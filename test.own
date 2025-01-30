@@ -1,0 +1,6 @@
+function calc(x: float, y: char){
+    let x = 5.0;
+    let y = 'zqsd';
+    let result = x + y;
+    return result;
+}
