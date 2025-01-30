@@ -1,0 +1,20 @@
+#[derive(Debug, PartialEq)]
+pub enum TokenType {
+    Keyword,
+    Identifier,
+    Type,
+    Int,
+    Float,
+    String,
+    Bool,
+    Operator,
+    Equals,
+    Semicolon,
+    Colon,
+    Comma,
+    LeftParen, 
+    RightParen,
+    LeftBracket,
+    RightBracket,
+    EOF,
+}
