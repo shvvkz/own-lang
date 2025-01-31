@@ -6,4 +6,8 @@ if (a == b) {
 } else {
     let x: int = 10;
     return x;
-}
+};
+
+if (a == b) {
+    a = a +1;
+};

@@ -1,5 +1,5 @@
 use super::expression_parser;
-use super::models::statement::{IfStatement, SwitchCase, SwitchStatement, VarAffection};
+use super::models::statement::{IfStatement, SwitchCase, SwitchStatement, VarAffection, WhileStatement};
 use super::parser::Parser;
 use crate::lex::models::token_type::TokenType;
 use crate::parser::models::statement::{Statement, VarDeclaration};
@@ -13,9 +13,17 @@ pub fn parse_statement(parser: &mut Parser) -> Option<Statement> {
     } else if is_var_affection(parser) {
         parse_var_affection(parser).map(Statement::VarAffection)
     } else if parser.is_keyword("if") {
-        parse_if_stmt(parser).map(Statement::If)
+        let if_stmt = parse_if_stmt(parser)?;
+        parser.consume(TokenType::Semicolon, "Expected ';' after if statement")?;
+        return Some(Statement::If(if_stmt));
     } else if parser.is_keyword("switch") {
-        parse_switch_stmt(parser).map(Statement::Switch)
+        let switch_stmt = parse_switch_stmt(parser)?;
+        parser.consume(TokenType::Semicolon, "Expected ';' after switch statement")?;
+        return Some(Statement::Switch(switch_stmt));
+    } else if parser.is_keyword("while") {
+        let while_stmt = parser_while_stmt(parser)?;
+        parser.consume(TokenType::Semicolon, "Expected ';' after while statement")?;
+        return Some(Statement::While(while_stmt));
     } else {
         eprintln!("Parser warning: unexpected token: {:?}", parser.peek());
         parser.advance();
@@ -175,6 +183,20 @@ fn parse_switch_stmt(parser: &mut Parser) -> Option<SwitchStatement> {
         cases,
         default: default_block,
     })
+}
+
+fn parser_while_stmt(parser: &mut Parser) -> Option<WhileStatement> {
+    parser.consume_keyword("while")?;
+    parser.consume(TokenType::LeftParen, "Expected '(' after 'while'")?;
+    let condition = expression_parser::parse_expression(parser)?;
+    parser.consume(TokenType::RightParen, "Expected ')' after while condition")?;
+    parser.consume(TokenType::LeftBracket, "Expected '{' after while(...)")?;
+
+    let body = parse_block_like(parser)?;
+
+    parser.consume(TokenType::RightBracket, "Expected '}' after while block")?;
+
+    Some(WhileStatement { condition, body })
 }
 
 /// Lit une suite de statements jusqu'à rencontrer la `}` ou la fin du fichier.
