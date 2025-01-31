@@ -1,4 +1,4 @@
 let x: int = 5;
 while ("x > 0") { // Erreur: Condition dans 'while' doit être de type 'bool', trouvé 'string'
     x = x - 1;
-}
+};

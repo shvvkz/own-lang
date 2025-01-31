@@ -1,6 +1,6 @@
 let x: int = 10;
-if (x > 5) {
-    return x;
+if (x == 5) {
+    x = x - 1;
 } else {
-    return 0;
-}
+    x = x + 1;
+};

@@ -3,31 +3,37 @@
 use crate::parser::models::ast::AST;
 use crate::parser::models::expression::Expression;
 use crate::parser::models::statement::{ForStatement, FunctionDeclaration, Statement, SwitchStatement, VarAffection, WhileStatement};
+use crate::parser::parser::Parser;
 use crate::semantic::models::semantic::{Symbol, SymbolType, SymbolTable};
-use crate::semantic::expression_analyzer::ExpressionAnalyzer;
 use crate::semantic::statement_analyzer::StatementAnalyzer;
 
 pub struct SemanticAnalyzer {
     pub symbol_table: SymbolTable,
     pub errors: Vec<String>,
-    pub current_function_return_type: Option<String>, // Pour suivre le type de retour attendu
+    pub current_function_return_type: Option<String>,
+    pub ast: AST
 }
 
 impl SemanticAnalyzer {
     /// Crée un nouvel analyseur sémantique avec une table de symboles globale.
-    pub fn new() -> Self {
+    pub fn new(input: String) -> Self {
+        let mut parser= Parser::new(input);
+        let ast = parser.parse_file();
         SemanticAnalyzer {
             symbol_table: SymbolTable::new(None),
             errors: Vec::new(),
             current_function_return_type: None,
+            ast
         }
     }
 
     /// Lance l'analyse sémantique sur l'AST.
-    pub fn analyze(&mut self, ast: &AST) {
-        for stmt in &ast.statements {
+    pub fn analyze(&mut self) -> Vec<String> {
+        let statements = self.ast.statements.clone();
+        for stmt in &statements {
             self.analyze_statement(stmt);
         }
+        return self.errors.clone();
     }
 
     /// Implémentation des autres méthodes comme `analyze_var_declaration`, `analyze_return_statement`, etc.

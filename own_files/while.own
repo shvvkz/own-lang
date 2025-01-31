@@ -1,4 +1,0 @@
-while (condition) {
-    let a: int = 5;
-    return a;
-};

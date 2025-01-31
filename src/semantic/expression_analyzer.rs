@@ -1,9 +1,8 @@
 // semantic/expression_analyzer.rs
 
 use crate::parser::models::expression::Expression;
-use crate::semantic::models::semantic::{Symbol, SymbolType, SymbolTable};
+use crate::semantic::models::semantic::SymbolType;
 use crate::semantic::analyzer::SemanticAnalyzer;
-use std::collections::HashMap;
 
 pub trait ExpressionAnalyzer {
     /// Analyse une expression et retourne son type.

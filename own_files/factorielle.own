@@ -1,0 +1,9 @@
+function factorielle(a: int): int {
+    let result: int = 1;
+    for (let i: int = 1; i >= a; i = i + 1;) {
+        result = result + i;
+    };
+    return result;
+}
+
+factorielle(1);

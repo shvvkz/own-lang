@@ -1,4 +1,6 @@
 let x: int = 10;
-if (x) { // Erreur: Condition dans 'if' doit être de type 'bool', trouvé 'int'
-    return x;
-}
+if (x) {
+    x = x - 1;
+} else {
+    x = x + 1;
+};
