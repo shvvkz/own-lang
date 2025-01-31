@@ -5,6 +5,7 @@ pub enum Statement {
     VarDeclaration(VarDeclaration),
     VarAffection(VarAffection),
     Return(Option<Expression>),
+    If(IfStatement),
     FunctionDecl(FunctionDecl),
     // Autres statements (If, While, etc.)
 }
@@ -25,6 +26,13 @@ pub struct VarAffection {
 #[derive(Debug, PartialEq, Clone)]
 pub struct Return {
     pub value: Expression,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct IfStatement {
+    pub condition: Expression,
+    pub then_branch: Vec<Statement>,
+    pub else_branch: Option<Vec<Statement>>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
