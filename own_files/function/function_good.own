@@ -1,0 +1,4 @@
+function add(a: int, b: int): int {
+    let result: int = a + b;
+    return result;
+}

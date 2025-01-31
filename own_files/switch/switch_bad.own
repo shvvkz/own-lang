@@ -1,0 +1,7 @@
+let x: int = 2;
+switch (x) {
+    case "1": // Erreur: Type du 'case' ne correspond pas au type du 'switch' ('int' vs 'string')
+        return 1;
+    default:
+        return 0;
+};
