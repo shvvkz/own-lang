@@ -1,6 +1,5 @@
-function calc(x: float, y: char){
-    let x = 5.0;
-    let y = 'zqsd';
-    let result = x + y;
-    return result;
-}
+let x: string = "az";
+let z: float = 5.1;
+let a: bool = false;
+let b: bool = true;
+let c: int = 1;
