@@ -1,5 +1,5 @@
 use super::expression_parser;
-use super::models::statement::{IfStatement, VarAffection};
+use super::models::statement::{IfStatement, SwitchCase, SwitchStatement, VarAffection};
 use super::parser::Parser;
 use crate::lex::models::token_type::TokenType;
 use crate::parser::models::statement::{Statement, VarDeclaration};
@@ -14,6 +14,8 @@ pub fn parse_statement(parser: &mut Parser) -> Option<Statement> {
         parse_var_affection(parser).map(Statement::VarAffection)
     } else if parser.is_keyword("if") {
         parse_if_stmt(parser).map(Statement::If)
+    } else if parser.is_keyword("switch") {
+        parse_switch_stmt(parser).map(Statement::Switch)
     } else {
         eprintln!("Parser warning: unexpected token: {:?}", parser.peek());
         parser.advance();
@@ -72,7 +74,7 @@ fn parse_return_stmt(parser: &mut Parser) -> Option<Statement> {
 fn parse_var_affection(parser: &mut Parser) -> Option<VarAffection> {
     let name_token = parser.consume(
         TokenType::Identifier,
-        "Expected identifier for variable affection"
+        "Expected identifier for variable affection",
     )?;
     let name = name_token.value;
 
@@ -82,36 +84,29 @@ fn parse_var_affection(parser: &mut Parser) -> Option<VarAffection> {
 
     parser.consume(
         TokenType::Semicolon,
-        "Expected ';' at the end of variable affection"
+        "Expected ';' at the end of variable affection",
     )?;
 
-    Some(VarAffection { name, value: value_expr })
+    Some(VarAffection {
+        name,
+        value: value_expr,
+    })
 }
 
 pub fn parse_if_stmt(parser: &mut Parser) -> Option<IfStatement> {
-
     parser.consume_keyword("if")?;
-
     parser.consume(TokenType::LeftParen, "Expected '(' after 'if'")?;
-
     let condition = expression_parser::parse_expression(parser)?;
 
     parser.consume(TokenType::RightParen, "Expected ')' after condition")?;
-
     parser.consume(TokenType::LeftBracket, "Expected '{' after if condition")?;
 
     let then_branch = parse_block_like(parser)?;
-
     parser.consume(TokenType::RightBracket, "Expected '}' after if block")?;
-
     let else_branch = if parser.is_keyword("else") {
-
         parser.advance();
-
         parser.consume(TokenType::LeftBracket, "Expected '{' after 'else'")?;
-
         let branch = parse_block_like(parser)?;
-
         parser.consume(TokenType::RightBracket, "Expected '}' after else block")?;
 
         Some(branch)
@@ -123,6 +118,62 @@ pub fn parse_if_stmt(parser: &mut Parser) -> Option<IfStatement> {
         condition,
         then_branch,
         else_branch,
+    })
+}
+
+fn parse_switch_stmt(parser: &mut Parser) -> Option<SwitchStatement> {
+    parser.consume_keyword("switch")?;
+    parser.consume(TokenType::LeftParen, "Expected '(' after 'switch'")?;
+    let condition = expression_parser::parse_expression(parser)?;
+    parser.consume(TokenType::RightParen, "Expected ')' after switch condition")?;
+    parser.consume(TokenType::LeftBracket, "Expected '{' after switch(...)")?;
+
+    let mut cases = Vec::new();
+    let mut default_block = None;
+
+    while !parser.check(TokenType::RightBracket) && !parser.is_at_end() {
+        if parser.is_keyword("case") {
+            parser.advance();
+            let value = expression_parser::parse_expression(parser)?;
+            parser.consume(TokenType::LeftBracket, "Expected '{' after case expression")?;
+            let body = parse_block_like(parser)?;
+            parser.consume(
+                TokenType::RightBracket,
+                "Expected '}' at the end of case block",
+            )?;
+            cases.push(SwitchCase { value, body });
+
+            if parser.check(TokenType::Comma) {
+                parser.advance();
+            }
+        } else if parser.is_keyword("default") {
+            parser.advance();
+            parser.consume(TokenType::LeftBracket, "Expected '{' after 'default'")?;
+            let block = parse_block_like(parser)?;
+            parser.consume(
+                TokenType::RightBracket,
+                "Expected '}' at the end of default block",
+            )?;
+            default_block = Some(block);
+
+            if parser.check(TokenType::Comma) {
+                parser.advance();
+            }
+        } else {
+            eprintln!(
+                "Error while parsing switch statement: unexpected token: {:?}",
+                parser.peek()
+            );
+            parser.advance();
+            break;
+        }
+    }
+
+    parser.consume(TokenType::RightBracket, "Expected '}' after switch block")?;
+    Some(SwitchStatement {
+        condition,
+        cases,
+        default: default_block,
     })
 }
 
@@ -143,7 +194,6 @@ pub fn parse_block_like(parser: &mut Parser) -> Option<Vec<Statement>> {
     Some(statements)
 }
 
-
 fn is_var_affection(parser: &Parser) -> bool {
     if parser.is_at_end() {
         return false;
@@ -161,4 +211,3 @@ fn is_var_affection(parser: &Parser) -> bool {
     let next_token = &parser.tokens[next_position];
     next_token.token_type == TokenType::Equals
 }
-

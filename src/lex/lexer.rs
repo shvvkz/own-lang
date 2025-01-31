@@ -40,7 +40,7 @@ impl Lexer {
 
     fn get_token_type(word: &str) -> TokenType {
         match word {
-            "let" | "if" | "else" | "return" | "function" => TokenType::Keyword,
+            "let" | "if" | "else" | "return" | "function" | "switch" | "case" | "default" => TokenType::Keyword,
             "int" | "float" | "bool" | "string" => TokenType::Type,
             "true" | "false" => TokenType::Bool,
             ";" => TokenType::Semicolon,

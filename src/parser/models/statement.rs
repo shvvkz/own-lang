@@ -6,6 +6,8 @@ pub enum Statement {
     VarAffection(VarAffection),
     Return(Option<Expression>),
     If(IfStatement),
+    Switch(SwitchStatement),
+    While(WhileStatement),
     FunctionDecl(FunctionDecl),
     // Autres statements (If, While, etc.)
 }
@@ -33,6 +35,25 @@ pub struct IfStatement {
     pub condition: Expression,
     pub then_branch: Vec<Statement>,
     pub else_branch: Option<Vec<Statement>>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct SwitchStatement {
+    pub condition: Expression,
+    pub cases: Vec<SwitchCase>,
+    pub default: Option<Vec<Statement>>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct SwitchCase {
+    pub value: Expression,
+    pub body: Vec<Statement>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct WhileStatement{
+    pub condition: Expression,
+    pub body: Vec<Statement>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
