@@ -6,7 +6,7 @@ mod parser;
 mod lex;
 
 fn main() {
-    let input = std::fs::read_to_string("own_files/switch.own").unwrap();
+    let input = std::fs::read_to_string("own_files/test.own").unwrap();
     println!("Source:\n{}", input);
 
     let mut lexer = Lexer::new(input);

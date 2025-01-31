@@ -1,0 +1,29 @@
+let x: int = 2;
+let y: int = 0;
+
+function foo(a: string, b: string, c: int): string {
+    switch(c) {
+    case 1 {
+        if (a == "bar"){
+            return a;
+        } else {
+            return "zaza";
+        }
+
+    },
+    case 2 {
+        y = y + 1;
+        return "Value was 2";
+    },
+    default {
+        let x: int = 1
+        while ( x < 10 ) {
+            x = x + 2;
+        };
+        return x,
+    }
+};
+
+foo("Hello, ", "world!", 123);
+
+

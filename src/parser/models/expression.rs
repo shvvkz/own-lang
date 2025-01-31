@@ -6,6 +6,7 @@ pub enum Expression {
     Str(String),
     Bool(bool),
     Binary(Box<BinaryExpression>),
+    FunctionCall(Box<FunctionCall>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -13,4 +14,10 @@ pub struct BinaryExpression {
     pub left: Expression,
     pub op: String,
     pub right: Expression,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct FunctionCall {
+    pub name: String,
+    pub arguments: Vec<Expression>,
 }

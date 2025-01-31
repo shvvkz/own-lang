@@ -1,5 +1,8 @@
 use super::expression_parser;
-use super::models::statement::{IfStatement, SwitchCase, SwitchStatement, VarAffection, WhileStatement};
+use super::models::statement::{
+    FunctionDeclaration, IfStatement, Parameter, SwitchCase, SwitchStatement, VarAffection,
+    WhileStatement,
+};
 use super::parser::Parser;
 use crate::lex::models::token_type::TokenType;
 use crate::parser::models::statement::{Statement, VarDeclaration};
@@ -24,6 +27,19 @@ pub fn parse_statement(parser: &mut Parser) -> Option<Statement> {
         let while_stmt = parser_while_stmt(parser)?;
         parser.consume(TokenType::Semicolon, "Expected ';' after while statement")?;
         return Some(Statement::While(while_stmt));
+    } else if parser.is_keyword("function") {
+        parser_function_decl(parser).map(Statement::FunctionDeclaration)
+    } else if parser.check(TokenType::Identifier) {
+        if let Some(expr) = expression_parser::parse_expression(parser) {
+            parser.consume(
+                TokenType::Semicolon,
+                "Expected ';' after expression statement",
+            )?;
+            return Some(Statement::ExpressionStatement(expr));
+        } else {
+            eprintln!("Could not parse expression statement");
+            return None;
+        }
     } else {
         eprintln!("Parser warning: unexpected token: {:?}", parser.peek());
         parser.advance();
@@ -197,6 +213,49 @@ fn parser_while_stmt(parser: &mut Parser) -> Option<WhileStatement> {
     parser.consume(TokenType::RightBracket, "Expected '}' after while block")?;
 
     Some(WhileStatement { condition, body })
+}
+
+fn parser_function_decl(parser: &mut Parser) -> Option<FunctionDeclaration> {
+    parser.consume_keyword("function")?;
+    let name_token = parser.consume(TokenType::Identifier, "Expected function name")?;
+    let name = name_token.value;
+
+    parser.consume(TokenType::LeftParen, "Expected '(' after function name")?;
+    let mut parameters: Vec<Parameter> = Vec::new();
+    while !parser.check(TokenType::RightParen) {
+        let param_name = parser.consume(TokenType::Identifier, "Expected parameter name")?;
+        parser.consume(TokenType::Colon, "Expected ':' after parameter name")?;
+        let param_type = parser.consume(TokenType::Type, "Expected parameter type")?;
+        let parameter = Parameter {
+            name: param_name.value,
+            type_name: param_type.value,
+        };
+        parameters.push(parameter);
+
+        if parser.check(TokenType::Comma) {
+            parser.advance();
+        }
+    }
+    parser.consume(
+        TokenType::RightParen,
+        "Expected ')' after function parameters",
+    )?;
+
+    parser.consume(TokenType::Colon, "Expected ':' after function parameters")?;
+    let return_type = parser
+        .consume(TokenType::Type, "Expected return type")?
+        .value;
+
+    parser.consume(TokenType::LeftBracket, "Expected '{' after function(...)")?;
+    let body = parse_block_like(parser)?;
+    parser.consume(TokenType::RightBracket, "Expected '}' after function block")?;
+
+    Some(FunctionDeclaration {
+        name,
+        parameters,
+        return_type,
+        body,
+    })
 }
 
 /// Lit une suite de statements jusqu'à rencontrer la `}` ou la fin du fichier.

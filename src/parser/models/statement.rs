@@ -8,8 +8,8 @@ pub enum Statement {
     If(IfStatement),
     Switch(SwitchStatement),
     While(WhileStatement),
-    FunctionDecl(FunctionDecl),
-    // Autres statements (If, While, etc.)
+    FunctionDeclaration(FunctionDeclaration),
+    ExpressionStatement(Expression),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -57,9 +57,10 @@ pub struct WhileStatement{
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct FunctionDecl {
+pub struct FunctionDeclaration{
     pub name: String,
-    pub params: Vec<Parameter>,
+    pub parameters: Vec<Parameter>,
+    pub return_type: String,
     pub body: Vec<Statement>,
 }
 
