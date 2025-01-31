@@ -22,7 +22,7 @@ impl Lexer {
         l
     }
 
-    pub fn read_char(&mut self) {
+    fn read_char(&mut self) {
         if self.read_position >= self.input.len() {
             self.ch = '\0';
         } else {
@@ -30,6 +30,30 @@ impl Lexer {
         }
         self.position = self.read_position;
         self.read_position += 1;
+
+        if self.ch == '/' {
+            let next = if self.read_position < self.input.len() {
+                self.input.as_bytes()[self.read_position] as char
+            } else {
+                '\0'
+            };
+            if next == '/' {
+                self.read_position += 1;
+                self.position = self.read_position;
+                while self.read_position < self.input.len()
+                    && self.input.as_bytes()[self.read_position] as char != '\n'
+                {
+                    self.read_position += 1;
+                }
+                if self.read_position < self.input.len() {
+                    self.ch = self.input.as_bytes()[self.read_position] as char;
+                } else {
+                    self.ch = '\0';
+                }
+                self.read_position += 1;
+                self.position = self.read_position;
+            }
+        }
     }
 
     fn skip_whitespace(&mut self) {
@@ -40,14 +64,17 @@ impl Lexer {
 
     fn get_token_type(word: &str) -> TokenType {
         match word {
-            "let" | "if" | "else" | "return" | "function" => TokenType::Keyword,
+            "let" | "if" | "else" | "return" | "function" | "switch" | "case" | "default"
+            | "while" | "for" => TokenType::Keyword,
             "int" | "float" | "bool" | "string" => TokenType::Type,
             "true" | "false" => TokenType::Bool,
             ";" => TokenType::Semicolon,
             ":" => TokenType::Colon,
             "," => TokenType::Comma,
             "=" => TokenType::Equals,
-            "+" | "-" | "*" | "/" | "==" | "<=" | ">=" | ">" | "<" | "%" => TokenType::Operator,
+            "+" | "-" | "*" | "/" | "==" | "<=" | ">=" | ">" | "<" | "%" | "!=" => {
+                TokenType::Operator
+            }
             "(" => TokenType::LeftParen,
             ")" => TokenType::RightParen,
             "{" => TokenType::LeftBracket,
@@ -55,6 +82,41 @@ impl Lexer {
             _ if word.parse::<i64>().is_ok() => TokenType::Int,
             _ if word.parse::<f64>().is_ok() => TokenType::Float,
             _ => TokenType::Identifier,
+        }
+    }
+
+    fn read_operator(&mut self) -> String {
+        let c1 = self.ch;
+        let c2 = if self.read_position < self.input.len() {
+            self.input.as_bytes()[self.read_position] as char
+        } else {
+            '\0'
+        };
+        match (c1, c2) {
+            ('!', '=') => {
+                self.read_char();
+                self.read_char();
+                "!=".to_string()
+            }
+            ('=', '=') => {
+                self.read_char();
+                self.read_char();
+                "==".to_string()
+            }
+            ('<', '=') => {
+                self.read_char();
+                self.read_char();
+                "<=".to_string()
+            }
+            ('>', '=') => {
+                self.read_char();
+                self.read_char();
+                ">=".to_string()
+            }
+            _ => {
+                self.read_char();
+                c1.to_string()
+            }
         }
     }
 
@@ -71,29 +133,42 @@ impl Lexer {
         if self.ch.is_alphabetic() {
             let word = self.read_identifier();
             let token_type = Self::get_token_type(&word);
-            return Token { token_type, value: word };
+            return Token {
+                token_type,
+                value: word,
+            };
         }
 
         if self.ch.is_numeric() {
             let number = self.read_number();
-            let token_type = if number.contains('.') { TokenType::Float } else { TokenType::Int };
-            return Token { token_type, value: number };
+            let token_type = if number.contains('.') {
+                TokenType::Float
+            } else {
+                TokenType::Int
+            };
+            return Token {
+                token_type,
+                value: number,
+            };
         }
 
         if self.ch == '"' || self.ch == '\'' {
             let string_value = self.read_string();
-            return Token { token_type: TokenType::String, value: string_value };
+            return Token {
+                token_type: TokenType::String,
+                value: string_value,
+            };
         }
 
-        let single_char = self.ch.to_string();
-        let token_type = Self::get_token_type(&single_char);
-        self.read_char();
+        let op_str = self.read_operator();
+        let token_type = Self::get_token_type(&op_str);
 
-        Token { token_type, value: single_char }
+        Token {
+            token_type,
+            value: op_str,
+        }
     }
 }
-
-
 
 impl TokenReader for Lexer {
     fn read_identifier(&mut self) -> String {
