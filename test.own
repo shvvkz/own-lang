@@ -1,5 +1,0 @@
-let x: string = "az";
-let z: float = 5.1;
-let a: bool = false;
-let b: bool = true;
-let c: int = 1;

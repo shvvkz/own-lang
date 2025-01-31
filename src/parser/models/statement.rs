@@ -1,25 +1,30 @@
-#[derive(Debug, PartialEq, Clone)]
-pub struct AST {
-    pub statements: Vec<Statement>,
-}
+use crate::parser::models::expression::Expression;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Statement {
-    VarDecl(VarDecl),
+    VarDeclaration(VarDeclaration),
+    VarAffection(VarAffection),
+    Return(Option<Expression>),
     FunctionDecl(FunctionDecl),
-
-    // Plus tard, vous pourriez ajouter :
-    // Return(Expression),
-    // If { ... },
-    // While { ... },
-    // etc.
+    // Autres statements (If, While, etc.)
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct VarDecl {
+pub struct VarDeclaration {
     pub name: String,
     pub type_name: String,
     pub init: Option<Expression>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct VarAffection {
+    pub name: String,
+    pub value: Expression,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Return {
+    pub value: Expression,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -33,13 +38,4 @@ pub struct FunctionDecl {
 pub struct Parameter {
     pub name: String,
     pub type_name: String,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum Expression {
-    Ident(String),
-    Int(i64),
-    Float(f64),
-    Str(String),
-    Bool(bool),
 }

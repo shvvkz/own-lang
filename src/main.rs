@@ -1,15 +1,14 @@
-use crate::ast::parser::Parser;
+use crate::parser::parser::Parser;
 use crate::lex::lexer::Lexer;
 use crate::lex::models::token_type::TokenType;
 
-mod ast;
+mod parser;
 mod lex;
 
 fn main() {
-    let input = std::fs::read_to_string("test.own").unwrap();
+    let input = std::fs::read_to_string("own_files/declaration.own").unwrap();
     println!("Source:\n{}", input);
 
-    // 1) On génère des tokens avec le lexer
     let mut lexer = Lexer::new(input);
     let mut tokens = Vec::new();
 
@@ -21,12 +20,8 @@ fn main() {
         tokens.push(token);
     }
 
-    println!("Tokens: {:#?}", tokens);
-
-    // 2) On les envoie au parser
     let mut parser = Parser::new(tokens);
-    let ast_nodes = parser.parse();
+    let ast_nodes = parser.parse_file();
 
-    // 3) On affiche l’AST résultant
     println!("AST: {:#?}", ast_nodes);
 }
