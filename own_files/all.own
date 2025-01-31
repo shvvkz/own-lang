@@ -18,6 +18,9 @@ function foo(a: string, b: string, c: int, d: float): string {
             while ( d < 10 ) {
                 d = d + 2;
             };
+            for (let i: int = 0; i > 10; i = i + 1 ;){
+                foo();
+            };
             return d;
         },
     };
@@ -25,9 +28,3 @@ function foo(a: string, b: string, c: int, d: float): string {
 }
 
 foo("Hello, ", "world!", 123, 0.0);
-
-
-
-
-
-

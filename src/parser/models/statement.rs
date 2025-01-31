@@ -8,6 +8,7 @@ pub enum Statement {
     If(IfStatement),
     Switch(SwitchStatement),
     While(WhileStatement),
+    For(ForStatement),
     FunctionDeclaration(FunctionDeclaration),
     ExpressionStatement(Expression),
 }
@@ -55,6 +56,15 @@ pub struct WhileStatement{
     pub condition: Expression,
     pub body: Vec<Statement>,
 }
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ForStatement {
+    pub init: Box<Statement>,
+    pub cond: Box<Statement>,
+    pub incr: Box<Statement>,
+    pub body: Vec<Statement>,
+}
+
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FunctionDeclaration{

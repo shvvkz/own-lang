@@ -1,7 +1,8 @@
 use super::expression_parser;
+use super::models::expression::Expression;
 use super::models::statement::{
-    FunctionDeclaration, IfStatement, Parameter, SwitchCase, SwitchStatement, VarAffection,
-    WhileStatement,
+    ForStatement, FunctionDeclaration, IfStatement, Parameter, SwitchCase, SwitchStatement,
+    VarAffection, WhileStatement,
 };
 use super::parser::Parser;
 use crate::lex::models::token_type::TokenType;
@@ -24,9 +25,13 @@ pub fn parse_statement(parser: &mut Parser) -> Option<Statement> {
         parser.consume(TokenType::Semicolon, "Expected ';' after switch statement")?;
         return Some(Statement::Switch(switch_stmt));
     } else if parser.is_keyword("while") {
-        let while_stmt = parser_while_stmt(parser)?;
+        let while_stmt = parse_while_stmt(parser)?;
         parser.consume(TokenType::Semicolon, "Expected ';' after while statement")?;
         return Some(Statement::While(while_stmt));
+    } else if parser.is_keyword("for") {
+        let for_stmt = parse_for_stmt(parser)?;
+        parser.consume(TokenType::Semicolon, "Expected ';' after for statement")?;
+        return Some(Statement::For(for_stmt));
     } else if parser.is_keyword("function") {
         parser_function_decl(parser).map(Statement::FunctionDeclaration)
     } else if parser.check(TokenType::Identifier) {
@@ -201,7 +206,7 @@ fn parse_switch_stmt(parser: &mut Parser) -> Option<SwitchStatement> {
     })
 }
 
-fn parser_while_stmt(parser: &mut Parser) -> Option<WhileStatement> {
+fn parse_while_stmt(parser: &mut Parser) -> Option<WhileStatement> {
     parser.consume_keyword("while")?;
     parser.consume(TokenType::LeftParen, "Expected '(' after 'while'")?;
     let condition = expression_parser::parse_expression(parser)?;
@@ -213,6 +218,28 @@ fn parser_while_stmt(parser: &mut Parser) -> Option<WhileStatement> {
     parser.consume(TokenType::RightBracket, "Expected '}' after while block")?;
 
     Some(WhileStatement { condition, body })
+}
+
+pub fn parse_for_stmt(parser: &mut Parser) -> Option<ForStatement> {
+
+    parser.consume_keyword("for")?;
+    parser.consume(TokenType::LeftParen, "Expected '(' after 'for'")?;
+
+    let init_stmt = parse_statement(parser)?;
+    let cond_stmt = parse_statement(parser)?;
+    let incr_stmt = parse_statement(parser)?;
+
+    parser.consume(TokenType::RightParen, "Expected ')' after for(...)")?;
+    parser.consume(TokenType::LeftBracket, "Expected '{' after for(...)")?;
+    let body_statements = parse_block_like(parser)?;
+    parser.consume(TokenType::RightBracket, "Expected '}' after for block")?;
+
+    Some(ForStatement {
+        init: Box::new(init_stmt),
+        cond: Box::new(cond_stmt),
+        incr: Box::new(incr_stmt),
+        body: body_statements,
+    })
 }
 
 fn parser_function_decl(parser: &mut Parser) -> Option<FunctionDeclaration> {

@@ -22,7 +22,7 @@ impl Lexer {
         l
     }
 
-    pub fn read_char(&mut self) {
+    fn read_char(&mut self) {
         if self.read_position >= self.input.len() {
             self.ch = '\0';
         } else {
@@ -30,6 +30,30 @@ impl Lexer {
         }
         self.position = self.read_position;
         self.read_position += 1;
+
+        if self.ch == '/' {
+            let next = if self.read_position < self.input.len() {
+                self.input.as_bytes()[self.read_position] as char
+            } else {
+                '\0'
+            };
+            if next == '/' {
+                self.read_position += 1;
+                self.position = self.read_position;
+                while self.read_position < self.input.len()
+                    && self.input.as_bytes()[self.read_position] as char != '\n'
+                {
+                    self.read_position += 1;
+                }
+                if self.read_position < self.input.len() {
+                    self.ch = self.input.as_bytes()[self.read_position] as char;
+                } else {
+                    self.ch = '\0';
+                }
+                self.read_position += 1;
+                self.position = self.read_position;
+            }
+        }
     }
 
     fn skip_whitespace(&mut self) {
@@ -40,7 +64,8 @@ impl Lexer {
 
     fn get_token_type(word: &str) -> TokenType {
         match word {
-            "let" | "if" | "else" | "return" | "function" | "switch" | "case" | "default" | "while" => TokenType::Keyword,
+            "let" | "if" | "else" | "return" | "function" | "switch" | "case" | "default"
+            | "while" | "for" => TokenType::Keyword,
             "int" | "float" | "bool" | "string" => TokenType::Type,
             "true" | "false" => TokenType::Bool,
             ";" => TokenType::Semicolon,
@@ -61,22 +86,16 @@ impl Lexer {
     }
 
     fn read_operator(&mut self) -> String {
-        // on récupère le char courant
         let c1 = self.ch;
-
-        // on regarde s’il y a un second char
         let c2 = if self.read_position < self.input.len() {
             self.input.as_bytes()[self.read_position] as char
         } else {
             '\0'
         };
-
-        // maintenant, on regarde les cas
         match (c1, c2) {
             ('!', '=') => {
-                // on veut consommer les deux caractères
-                self.read_char(); // consomme le '!'
-                self.read_char(); // consomme le '='
+                self.read_char();
+                self.read_char();
                 "!=".to_string()
             }
             ('=', '=') => {
@@ -94,9 +113,7 @@ impl Lexer {
                 self.read_char();
                 ">=".to_string()
             }
-            // sinon, juste c1
             _ => {
-                // on consomme un seul char
                 self.read_char();
                 c1.to_string()
             }
@@ -143,8 +160,7 @@ impl Lexer {
             };
         }
 
-        // Sinon, potentiellement un opérateur (simple ou multi-caractère), parenthèse, etc.
-        let op_str = self.read_operator(); // <-- on appelle notre nouvelle fonction
+        let op_str = self.read_operator();
         let token_type = Self::get_token_type(&op_str);
 
         Token {
