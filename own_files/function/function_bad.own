@@ -1,0 +1,4 @@
+function add(a: int, b: int): int {
+    let result: float = a + b; // Erreur: Type mismatch dans déclaration de variable 'result'
+    return "sum"; // Erreur: Type mismatch dans 'return'
+}

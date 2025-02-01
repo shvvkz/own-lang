@@ -1,0 +1,12 @@
+let x: int = 2;
+switch (x) {
+    case "1" {
+        let z: int = 4;
+    },
+    case 2 {
+        let z: int= 5;
+    },
+    default{
+        let z: int = 0;
+    },
+};

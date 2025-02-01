@@ -1,0 +1,4 @@
+let x: int = 1;
+for (let i: int = 0; i - 10; i = "increment";) {
+    x = x + i;
+};

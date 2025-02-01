@@ -1,3 +1,4 @@
+use crate::lex::lexer::{self, Lexer};
 use crate::lex::models::{token::Token, token_type::TokenType};
 use crate::parser::models::ast::AST;
 use super::statement_parser;
@@ -5,16 +6,23 @@ use super::statement_parser;
 /// 🚀 The `Parser` structure holds the token stream and the current reading position.
 /// It provides methods to navigate and check the token stream.
 pub struct Parser {
-    /// All tokens provided by the lexer.
     pub tokens: Vec<Token>,
-
-    /// The current index in the `tokens` vector.
     pub position: usize,
 }
 
 impl Parser {
     /// 🔧 Creates a new `Parser` from a given vector of `Token`.
-    pub fn new(tokens: Vec<Token>) -> Self {
+    pub fn new(input: String) -> Self {
+        let mut lexer= Lexer::new(input);
+        let mut tokens = Vec::new();
+
+        loop {
+            let token = lexer.next_token();
+            if token.token_type == TokenType::EOF {
+                break;
+            }
+            tokens.push(token);
+        }
         Parser { tokens, position: 0 }
     }
 

@@ -1,50 +1,59 @@
-use super::expression_parser;
-use super::models::expression::Expression;
-use super::models::statement::{
+use super::parser::Parser;
+use crate::lex::models::token_type::TokenType;
+use crate::parser::expression_parser::parse_expression;
+use crate::parser::models::statement::{
     ForStatement, FunctionDeclaration, IfStatement, Parameter, SwitchCase, SwitchStatement,
     VarAffection, WhileStatement,
 };
-use super::parser::Parser;
-use crate::lex::models::token_type::TokenType;
 use crate::parser::models::statement::{Statement, VarDeclaration};
 
 /// Parses a single statement (variable declaration, return, etc.).
 pub fn parse_statement(parser: &mut Parser) -> Option<Statement> {
     if parser.is_keyword("let") {
+
         parse_var_decl(parser).map(Statement::VarDeclaration)
     } else if parser.is_keyword("return") {
+
         parse_return_stmt(parser)
     } else if is_var_affection(parser) {
         parse_var_affection(parser).map(Statement::VarAffection)
+
     } else if parser.is_keyword("if") {
         let if_stmt = parse_if_stmt(parser)?;
         parser.consume(TokenType::Semicolon, "Expected ';' after if statement")?;
         return Some(Statement::If(if_stmt));
+
     } else if parser.is_keyword("switch") {
         let switch_stmt = parse_switch_stmt(parser)?;
         parser.consume(TokenType::Semicolon, "Expected ';' after switch statement")?;
         return Some(Statement::Switch(switch_stmt));
+
     } else if parser.is_keyword("while") {
         let while_stmt = parse_while_stmt(parser)?;
         parser.consume(TokenType::Semicolon, "Expected ';' after while statement")?;
         return Some(Statement::While(while_stmt));
+
     } else if parser.is_keyword("for") {
         let for_stmt = parse_for_stmt(parser)?;
         parser.consume(TokenType::Semicolon, "Expected ';' after for statement")?;
         return Some(Statement::For(for_stmt));
+
     } else if parser.is_keyword("function") {
         parser_function_decl(parser).map(Statement::FunctionDeclaration)
+
     } else if parser.check(TokenType::Identifier) {
-        if let Some(expr) = expression_parser::parse_expression(parser) {
+        if let Some(expr) = parse_expression(parser) {
             parser.consume(
                 TokenType::Semicolon,
                 "Expected ';' after expression statement",
             )?;
             return Some(Statement::ExpressionStatement(expr));
+
         } else {
             eprintln!("Could not parse expression statement");
             return None;
         }
+
     } else {
         eprintln!("Parser warning: unexpected token: {:?}", parser.peek());
         parser.advance();
@@ -70,7 +79,7 @@ fn parse_var_decl(parser: &mut Parser) -> Option<VarDeclaration> {
     let mut init = None;
     if parser.check(TokenType::Equals) {
         parser.advance();
-        init = expression_parser::parse_expression(parser);
+        init = parse_expression(parser);
     }
 
     parser.consume(
@@ -92,7 +101,7 @@ fn parse_return_stmt(parser: &mut Parser) -> Option<Statement> {
     let expr = if parser.check(TokenType::Semicolon) {
         None
     } else {
-        Some(expression_parser::parse_expression(parser)?)
+        Some(parse_expression(parser)?)
     };
 
     parser.consume(TokenType::Semicolon, "Expected ';' after return")?;
@@ -109,7 +118,7 @@ fn parse_var_affection(parser: &mut Parser) -> Option<VarAffection> {
 
     parser.consume(TokenType::Equals, "Expected '=' in variable affection")?;
 
-    let value_expr = expression_parser::parse_expression(parser)?;
+    let value_expr = parse_expression(parser)?;
 
     parser.consume(
         TokenType::Semicolon,
@@ -125,7 +134,7 @@ fn parse_var_affection(parser: &mut Parser) -> Option<VarAffection> {
 pub fn parse_if_stmt(parser: &mut Parser) -> Option<IfStatement> {
     parser.consume_keyword("if")?;
     parser.consume(TokenType::LeftParen, "Expected '(' after 'if'")?;
-    let condition = expression_parser::parse_expression(parser)?;
+    let condition = parse_expression(parser)?;
 
     parser.consume(TokenType::RightParen, "Expected ')' after condition")?;
     parser.consume(TokenType::LeftBracket, "Expected '{' after if condition")?;
@@ -153,7 +162,7 @@ pub fn parse_if_stmt(parser: &mut Parser) -> Option<IfStatement> {
 fn parse_switch_stmt(parser: &mut Parser) -> Option<SwitchStatement> {
     parser.consume_keyword("switch")?;
     parser.consume(TokenType::LeftParen, "Expected '(' after 'switch'")?;
-    let condition = expression_parser::parse_expression(parser)?;
+    let condition = parse_expression(parser)?;
     parser.consume(TokenType::RightParen, "Expected ')' after switch condition")?;
     parser.consume(TokenType::LeftBracket, "Expected '{' after switch(...)")?;
 
@@ -163,7 +172,7 @@ fn parse_switch_stmt(parser: &mut Parser) -> Option<SwitchStatement> {
     while !parser.check(TokenType::RightBracket) && !parser.is_at_end() {
         if parser.is_keyword("case") {
             parser.advance();
-            let value = expression_parser::parse_expression(parser)?;
+            let value = parse_expression(parser)?;
             parser.consume(TokenType::LeftBracket, "Expected '{' after case expression")?;
             let body = parse_block_like(parser)?;
             parser.consume(
@@ -209,7 +218,7 @@ fn parse_switch_stmt(parser: &mut Parser) -> Option<SwitchStatement> {
 fn parse_while_stmt(parser: &mut Parser) -> Option<WhileStatement> {
     parser.consume_keyword("while")?;
     parser.consume(TokenType::LeftParen, "Expected '(' after 'while'")?;
-    let condition = expression_parser::parse_expression(parser)?;
+    let condition = parse_expression(parser)?;
     parser.consume(TokenType::RightParen, "Expected ')' after while condition")?;
     parser.consume(TokenType::LeftBracket, "Expected '{' after while(...)")?;
 
@@ -221,7 +230,6 @@ fn parse_while_stmt(parser: &mut Parser) -> Option<WhileStatement> {
 }
 
 pub fn parse_for_stmt(parser: &mut Parser) -> Option<ForStatement> {
-
     parser.consume_keyword("for")?;
     parser.consume(TokenType::LeftParen, "Expected '(' after 'for'")?;
 

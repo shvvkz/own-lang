@@ -1,0 +1,3 @@
+function foo(a: int, b: int): int {
+    return "hello"; // Erreur: Type mismatch, attendu 'int', trouvé 'string'
+}
