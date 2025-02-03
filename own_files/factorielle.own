@@ -1,9 +1,7 @@
-function factorielle(a: int): int {
-    let result: int = 1;
-    for (let i: int = 1; i >= a; i = i + 1;) {
-        result = result + i;
-    };
-    return result;
+function add(a: int, b: int): int{
+    return a + b;
 }
-
-factorielle(1);
+let num1: int = 1;
+let num2: int = 1;
+let result: int = add(num2, num1);
+print(result);

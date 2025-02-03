@@ -3,7 +3,7 @@ mod analyzer_tests {
     use std::fs;
     use std::path::Path;
 
-    use crate::parser::parser::Parser;
+    
     use crate::semantic::analyzer::SemanticAnalyzer;
 
     // Helper function to read a source file and return its content as a String

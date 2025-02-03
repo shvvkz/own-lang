@@ -1,4 +1,4 @@
-use crate::lex::lexer::{self, Lexer};
+use crate::lex::lexer::{Lexer};
 use crate::lex::models::{token::Token, token_type::TokenType};
 use crate::parser::models::ast::AST;
 use super::statement_parser;

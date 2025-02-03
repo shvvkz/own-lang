@@ -66,7 +66,7 @@ impl Lexer {
         match word {
             "let" | "if" | "else" | "return" | "function" | "switch" | "case" | "default"
             | "while" | "for" => TokenType::Keyword,
-            "int" | "float" | "bool" | "string" => TokenType::Type,
+            "int" | "float" | "bool" | "string" | "void" => TokenType::Type,
             "true" | "false" => TokenType::Bool,
             ";" => TokenType::Semicolon,
             ":" => TokenType::Colon,

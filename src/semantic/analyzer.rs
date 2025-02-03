@@ -19,8 +19,22 @@ impl SemanticAnalyzer {
     pub fn new(input: String) -> Self {
         let mut parser= Parser::new(input);
         let ast = parser.parse_file();
+        let mut symbol_table = SymbolTable::new(None);
+        
+        // Déclarer la fonction built-in print : print(string) -> void
+        symbol_table.define(
+            "print".to_string(),
+            Symbol {
+                name: "print".to_string(),
+                symbol_type: SymbolType::Function {
+                    parameters: vec!["string".to_string()],
+                    return_type: "void".to_string(),
+                },
+            }
+        ).expect("Failed to add built-in function print");
+
         SemanticAnalyzer {
-            symbol_table: SymbolTable::new(None),
+            symbol_table,
             errors: Vec::new(),
             current_function_return_type: None,
             ast
