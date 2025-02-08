@@ -9,7 +9,6 @@ use std::io::Write;
 use std::process::Command;
 use codegen::codegen::CodeGenerator;
 use semantic::analyzer::SemanticAnalyzer;
-use parser::parser::Parser;
 use crate::parser::models::ast::AST;
 
 fn main() {
@@ -31,18 +30,20 @@ fn main() {
     }
     let ast: AST = analyzer.ast;
 
+    println!("{:?}", ast);
+
     // Code Generation
     let mut codegen = CodeGenerator::new();
     codegen.generate(&ast);
     let asm_code = codegen.asm.join("\n");
 
-    // Écriture du code assembleur dans un fichier output.asm
+    // Write assembly code to output.asm
     let asm_file = "output.asm";
     let mut file = File::create(asm_file).expect("Failed to create output.asm");
     file.write_all(asm_code.as_bytes()).expect("Failed to write assembly code");
     println!("Assembly code written to {}", asm_file);
 
-    // Assembler avec nasm (format elf64)
+    // Assemble with nasm (format elf64)
     let object_file = "output.o";
     let nasm_status = Command::new("nasm")
         .args(&["-f", "elf64", asm_file, "-o", object_file])
@@ -54,10 +55,10 @@ fn main() {
     }
     println!("Object file generated: {}", object_file);
 
-    // Lier avec ld pour produire l'exécutable, en liant avec libc
-    let executable_file = "output";
+    // Link with ld to produce the executable, linking with libc
+    let executable_file = format!("{}.owne", input_path.trim_end_matches(".own"));
     let ld_status = Command::new("ld")
-        .args(&[object_file, "-o", executable_file, "-lc", "--dynamic-linker", "/lib64/ld-linux-x86-64.so.2"])
+        .args(&[object_file, "-o", &executable_file, "-lc", "--dynamic-linker", "/lib64/ld-linux-x86-64.so.2"])
         .status()
         .expect("Failed to execute ld");
     if !ld_status.success() {
@@ -65,4 +66,8 @@ fn main() {
         std::process::exit(1);
     }
     println!("Executable generated: {}", executable_file);
+
+    // Clean up intermediate files
+    fs::remove_file(asm_file).expect("Failed to remove asm file");
+    fs::remove_file(object_file).expect("Failed to remove object file");
 }

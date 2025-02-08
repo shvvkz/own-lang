@@ -2,3 +2,8 @@ function add(a: int, b: int): int {
     let result: int = a + b;
     return result;
 }
+
+let num1 :int = 1;
+let num2 :int = 2;
+let resultat: int = add(num1, num2);
+print(resultat);

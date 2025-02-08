@@ -1,3 +1,5 @@
 /target
 own_test/*
 /.dist
+output*
+note.txt

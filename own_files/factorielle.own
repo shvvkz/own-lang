@@ -1,7 +1,12 @@
-function add(a: int, b: int): int{
-    return a + b;
+function fact(n: int): int {
+    let result: int = 1;
+    for (let i: int = 1; i <= n; i = i + 1;) {
+        result = result * i;
+    };
+    return result;
 }
-let num1: int = 1;
-let num2: int = 1;
-let result: int = add(num2, num1);
-print(result);
+
+let number: int = 5;
+let factresult: int = fact(number);
+
+print(factresult);
