@@ -1,12 +1,14 @@
-let x: int = 2;
+let x: int = 0;
+let z: int;
 switch (x) {
     case 1 {
-        let z: int = 4;
+        z = 4;
     },
     case 2 {
-        let z: int = 5;
+        z = 5;
     },
     default{
-        let z: int = 0;
+        z = 0;
     },
 };
+print(z);

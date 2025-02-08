@@ -1,4 +1,6 @@
 let x: int = 5;
-while (x > 0) {
+let t: bool = true;
+while (t) {
     x = x - 1;
+    print(x);
 };
